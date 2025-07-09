@@ -8,41 +8,51 @@
  * License: GPL2+
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  */
-
-
- add_action('gform_after_submission_2', 'gf_handle_creol_job_submission', 10, 2);
+add_action('gform_after_submission_2', 'gf_handle_creol_job_submission', 10, 2);
 function gf_handle_creol_job_submission($entry, $form) {
-    // Replace field IDs with your actual form field IDs
-    $job_title        = rgar($entry, '1'); // Job Title
-    $company_name     = rgar($entry, '2'); // Company
-    $location         = rgar($entry, '3'); // Location
-    $job_type         = rgar($entry, '4'); // Job Type (Checkboxes)
-    $description      = rgar($entry, '5'); // Job Description
-    $apply_link       = rgar($entry, '6'); // Link to Apply
-    $contact_email    = rgar($entry, '7'); // Contact
-    $is_affiliate     = rgar($entry, '8'); // Affiliate checkbox
-    $duration         = rgar($entry, '9'); // Duration dropdown
+    // Form field values (update IDs if needed)
+    $job_title        = rgar($entry, '1');
+    $company_name     = rgar($entry, '2');
+    $location         = rgar($entry, '3');
+    $job_type         = rgar($entry, '4');
+    $description      = rgar($entry, '5');
+    $apply_link       = rgar($entry, '6');
+    $contact_email    = rgar($entry, '7');
+    $is_affiliate     = rgar($entry, '8');
+    $duration         = rgar($entry, '9');
 
-    // Determine post type based on checkbox
-    $post_type = empty($is_affiliate) ? 'portal_job' : 'jobs';
+    // Always use portal_job post type
+    $post_type = 'portal_job';
+
+    // Decide category name
+    $category_name = !empty($is_affiliate) ? 'Affiliate Job' : 'Portal Job';
+
+    // Get or create category
+    $category = get_category_by_slug(sanitize_title($category_name));
+    if (!$category) {
+        $category_id = wp_create_category($category_name);
+    } else {
+        $category_id = $category->term_id;
+    }
 
     // Create the post
     $post_id = wp_insert_post(array(
-        'post_title'   => $job_title,
-        'post_content' => $description,
-        'post_type'    => $post_type,
-        'post_status'  => 'pending',
+        'post_title'     => $job_title,
+        'post_content'   => $description,
+        'post_type'      => $post_type,
+        'post_status'    => 'pending',
+        'post_category'  => array($category_id),
     ));
 
-    // Save additional meta
+    // Save custom meta fields
     update_post_meta($post_id, 'company', $company_name);
     update_post_meta($post_id, 'location', $location);
     update_post_meta($post_id, 'job_type', $job_type);
     update_post_meta($post_id, 'apply_link', $apply_link);
     update_post_meta($post_id, 'contact', $contact_email);
     update_post_meta($post_id, 'duration', $duration);
-    update_post_meta($post_id, 'is_affiliate', !empty($is_affiliate) ? '1' : '0');
 }
+
 
 // 1. Register the cron event if it’s not already scheduled
 register_activation_hook(__FILE__, 'gf_schedule_old_job_cleanup');
