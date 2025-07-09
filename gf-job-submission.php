@@ -24,7 +24,7 @@ function gf_handle_creol_job_submission($entry, $form) {
     $duration         = rgar($entry, '9'); // Duration dropdown
 
     // Determine post type based on checkbox
-    $post_type = empty($is_affiliate) ? 'portal_jobs' : 'jobs';
+    $post_type = empty($is_affiliate) ? 'portal_job' : 'jobs';
 
     // Create the post
     $post_id = wp_insert_post(array(
@@ -61,7 +61,7 @@ function gf_clear_old_job_cron() {
 // 3. Hook into the cron to delete old job posts
 add_action('gf_delete_old_jobs', 'gf_delete_old_jobs_callback');
 function gf_delete_old_jobs_callback() {
-    $post_types = ['portal_jobs', 'jobs'];
+    $post_types = ['portal_job', 'jobs'];
 
     foreach ($post_types as $post_type) {
         $posts = get_posts([
