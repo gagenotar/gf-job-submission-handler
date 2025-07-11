@@ -20,16 +20,11 @@ function gf_handle_creol_job_submission($entry, $form) {
     $contact_email = sanitize_text_field(rgar($entry, '10'));
     $duration     = intval(rgar($entry, '12')) ?: 60;
 
-    // Get job type from multi-select field
-    $job_type = rgar($entry, '7');
+    // Get job type from dropdown field
+    $job_type = sanitize_text_field(rgar($entry, '7'));
     
     // Debug job type
-    error_log('Job Type from form: ' . print_r($job_type, true));
-    
-    // Ensure job_type is always an array
-    if (!is_array($job_type)) {
-        $job_type = $job_type ? [$job_type] : [];
-    }
+    error_log('Job Type from form: ' . $job_type);
 
     // Get affiliate status from dropdown (Yes/No)
     $is_affiliate = rgar($entry, '11');
