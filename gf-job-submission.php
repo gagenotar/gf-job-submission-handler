@@ -10,16 +10,16 @@
  */
 add_action('gform_after_submission_3', 'gf_handle_creol_job_submission', 10, 2);
 function gf_handle_creol_job_submission($entry, $form) {
-    // Sanitize form field values
-    $job_title    = sanitize_text_field(rgar($entry, '1'));
-    $company_name = sanitize_text_field(rgar($entry, '2'));
-    $location     = sanitize_text_field(rgar($entry, '3'));
-    $job_type     = sanitize_text_field(rgar($entry, '4'));
-    $description  = wp_kses_post(rgar($entry, '5'));
-    $apply_link   = esc_url_raw(rgar($entry, '6'));
-    $contact_email = sanitize_text_field(rgar($entry, '7'));
-    $is_affiliate = !empty(rgar($entry, '8')) ? 1 : 0;
-    $duration     = intval(rgar($entry, '9'));
+    // Sanitize form field values with correct field IDs
+    $job_title    = sanitize_text_field(rgar($entry, '6'));
+    $company_name = sanitize_text_field(rgar($entry, '4'));
+    $location     = sanitize_text_field(rgar($entry, '5'));
+    $job_type     = sanitize_text_field(rgar($entry, '7'));
+    $description  = wp_kses_post(rgar($entry, '8'));
+    $apply_link   = esc_url_raw(rgar($entry, '9'));
+    $contact_email = sanitize_text_field(rgar($entry, '10')); // Changed to ID 10
+    $is_affiliate = !empty(rgar($entry, '11')) ? 1 : 0;      // Changed to ID 11
+    $duration     = intval(rgar($entry, '12'));              // Changed to ID 12
 
     // Set default duration if not provided
     if (!$duration) {
