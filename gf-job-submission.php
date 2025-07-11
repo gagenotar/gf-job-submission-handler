@@ -20,26 +20,25 @@ function gf_handle_creol_job_submission($entry, $form) {
     $contact_email = sanitize_text_field(rgar($entry, '10'));
     $duration     = intval(rgar($entry, '12')) ?: 60;
 
-    // Normalize and sanitize job_type checkbox values
-    $job_type_raw = rgar($entry, '7');
-    if (!is_array($job_type_raw)) {
-        $job_type_raw = [$job_type_raw];
+    // Get job type from multi-select field
+    $job_type = rgar($entry, '7');
+    
+    // Debug job type
+    error_log('Job Type from form: ' . print_r($job_type, true));
+    
+    // Ensure job_type is always an array
+    if (!is_array($job_type)) {
+        $job_type = $job_type ? [$job_type] : [];
     }
 
-    $valid_job_types = ['Full-time', 'Part-time', 'Fellowship', 'Internship'];
-    $job_type = array_values(array_intersect($job_type_raw, $valid_job_types));
-
-    // Normalize is_affiliate checkbox
-    $is_affiliate_raw = rgar($entry, '11');
-    $is_affiliate = [];
-
-    if (!empty($is_affiliate_raw)) {
-        // Make sure this matches exactly with the ACF checkbox option
-        $is_affiliate[] = 'Check if your company is a CREOL Industrial Affiliate';
-    }
+    // Get affiliate status from dropdown (Yes/No)
+    $is_affiliate = rgar($entry, '11');
+    
+    // Debug affiliate status
+    error_log('Affiliate status from form: ' . print_r($is_affiliate, true));
 
     // Set the post category based on affiliate status
-    $categories = !empty($is_affiliate)
+    $categories = strtolower($is_affiliate) === 'yes' 
         ? [get_cat_ID('Affiliate Job')]
         : [get_cat_ID('Portal Job')];
 
