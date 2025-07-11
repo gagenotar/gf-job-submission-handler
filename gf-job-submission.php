@@ -8,7 +8,7 @@
  * License: GPL2+
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  */
-add_action('gform_after_submission_2', 'gf_handle_creol_job_submission', 10, 2);
+add_action('gform_after_submission_3', 'gf_handle_creol_job_submission', 10, 2);
 function gf_handle_creol_job_submission($entry, $form) {
     // Sanitize form field values
     $job_title    = sanitize_text_field(rgar($entry, '1'));
