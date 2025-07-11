@@ -14,12 +14,27 @@ function gf_handle_creol_job_submission($entry, $form) {
     $job_title    = sanitize_text_field(rgar($entry, '6'));
     $company_name = sanitize_text_field(rgar($entry, '4'));
     $location     = sanitize_text_field(rgar($entry, '5'));
-    $job_type     = rgar($entry, '7'); // Get raw value for checkboxes
+    // Get job type and convert to ACF-compatible format
+    $job_type_raw = rgar($entry, '7');
+    $job_type = [];
+    if (!empty($job_type_raw)) {
+        // Convert Gravity Forms checkbox format to ACF array format
+        foreach ($job_type_raw as $key => $value) {
+            if ($value) {
+                $job_type[] = $key;
+            }
+        }
+    }
+
     $description  = wp_kses_post(rgar($entry, '8'));
     $apply_link   = esc_url_raw(rgar($entry, '9'));
-    $contact_email = sanitize_text_field(rgar($entry, '10')); // Changed to ID 10
-    $is_affiliate = !empty(rgar($entry, '11')) ? 1 : 0;      // Changed to ID 11
-    $duration     = intval(rgar($entry, '12'));              // Changed to ID 12
+    $contact_email = sanitize_text_field(rgar($entry, '10'));
+
+    // Convert affiliate checkbox to ACF-compatible format
+    $is_affiliate_raw = rgar($entry, '11');
+    $is_affiliate = !empty($is_affiliate_raw) ? 'yes' : 'no';  // ACF typically uses yes/no for checkboxes
+
+    $duration     = intval(rgar($entry, '12'));
 
     // Set default duration if not provided
     if (!$duration) {
@@ -32,6 +47,12 @@ function gf_handle_creol_job_submission($entry, $form) {
     } else {
         $categories = [get_cat_ID('Portal Job')];
     }
+
+    // Debug logging
+    error_log('Job Type Raw: ' . print_r($job_type_raw, true));
+    error_log('Job Type Processed: ' . print_r($job_type, true));
+    error_log('Affiliate Raw: ' . print_r($is_affiliate_raw, true));
+    error_log('Affiliate Processed: ' . $is_affiliate);
 
     // Create the post
     $post_id = wp_insert_post(array(
@@ -50,14 +71,11 @@ function gf_handle_creol_job_submission($entry, $form) {
     // Save custom meta fields
     update_post_meta($post_id, 'company_name', $company_name);
     update_post_meta($post_id, 'location', $location);
-    // Handle job type as array for multiple selections
-    if (is_array($job_type)) {
-        $job_type = implode(', ', $job_type);
-    }
-    update_post_meta($post_id, 'job_type', $job_type);
+    // Save job type as ACF field
+    update_field('job_type', $job_type, $post_id);
     update_post_meta($post_id, 'apply_link', $apply_link);
     update_post_meta($post_id, 'contact', $contact_email);
-    update_post_meta($post_id, 'is_affiliate', $is_affiliate);
+    update_field('is_affiliate', $is_affiliate, $post_id);
     update_post_meta($post_id, 'job_duration', $duration);
 }
 
