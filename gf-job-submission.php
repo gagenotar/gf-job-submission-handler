@@ -14,7 +14,7 @@ function gf_handle_creol_job_submission($entry, $form) {
     $job_title    = sanitize_text_field(rgar($entry, '6'));
     $company_name = sanitize_text_field(rgar($entry, '4'));
     $location     = sanitize_text_field(rgar($entry, '5'));
-    $job_type     = sanitize_text_field(rgar($entry, '7'));
+    $job_type     = rgar($entry, '7'); // Get raw value for checkboxes
     $description  = wp_kses_post(rgar($entry, '8'));
     $apply_link   = esc_url_raw(rgar($entry, '9'));
     $contact_email = sanitize_text_field(rgar($entry, '10')); // Changed to ID 10
@@ -50,6 +50,10 @@ function gf_handle_creol_job_submission($entry, $form) {
     // Save custom meta fields
     update_post_meta($post_id, 'company_name', $company_name);
     update_post_meta($post_id, 'location', $location);
+    // Handle job type as array for multiple selections
+    if (is_array($job_type)) {
+        $job_type = implode(', ', $job_type);
+    }
     update_post_meta($post_id, 'job_type', $job_type);
     update_post_meta($post_id, 'apply_link', $apply_link);
     update_post_meta($post_id, 'contact', $contact_email);
