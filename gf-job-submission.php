@@ -18,12 +18,12 @@ function gf_handle_creol_job_submission($entry, $form) {
     $job_type_raw = rgar($entry, '7');
     $job_type = [];
     
-    // Map Gravity Forms values to ACF values
+    // Map to exact ACF field choices
     $job_type_map = [
-        'Full-time' => 'full-time',
-        'Part-time' => 'part-time',
-        'Fellowship' => 'fellowship',
-        'Internship' => 'internship'
+        'Full-time' => 'Full-time',
+        'Part-time' => 'Part-time',
+        'Fellowship' => 'Fellowship',
+        'Internship' => 'Internship'
     ];
     
     if (!empty($job_type_raw)) {
@@ -85,10 +85,20 @@ function gf_handle_creol_job_submission($entry, $form) {
     update_post_meta($post_id, 'location', $location);
     // Save job type using ACF
     if (!empty($job_type)) {
+        // Debug what we're about to save
+        error_log('DEBUG - Attempting to save these job types:');
+        error_log(print_r($job_type, true));
+        
+        // Try both ways of saving to ACF
         update_field('job_type', $job_type, $post_id);
-        // Backup save as post meta for debugging
+        update_field('job_type', array_values($job_type), $post_id); // Try as simple array
+        
+        // Save as regular post meta for debugging
         update_post_meta($post_id, '_debug_job_type', $job_type);
-        error_log('Saving job types to post ' . $post_id . ': ' . print_r($job_type, true));
+        update_post_meta($post_id, '_debug_job_type_raw', $job_type_raw);
+        
+        error_log('Post ID: ' . $post_id);
+        error_log('ACF Field Key: job_type');
     }
     update_post_meta($post_id, 'apply_link', $apply_link);
     update_post_meta($post_id, 'contact', $contact_email);
