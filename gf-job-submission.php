@@ -17,14 +17,26 @@ function gf_handle_creol_job_submission($entry, $form) {
     // Get job type and convert to ACF-compatible format
     $job_type_raw = rgar($entry, '7');
     $job_type = [];
+    
+    // Map Gravity Forms values to ACF values
+    $job_type_map = [
+        'Full-time' => 'full-time',
+        'Part-time' => 'part-time',
+        'Fellowship' => 'fellowship',
+        'Internship' => 'internship'
+    ];
+    
     if (!empty($job_type_raw)) {
-        // Convert Gravity Forms checkbox format to ACF array format
-        foreach ($job_type_raw as $key => $value) {
-            if ($value) {
-                $job_type[] = $key;
+        foreach ($job_type_raw as $selected) {
+            if (isset($job_type_map[$selected])) {
+                $job_type[] = $job_type_map[$selected];
             }
         }
     }
+    
+    // Debug the job type data
+    error_log('Raw job type from form: ' . print_r($job_type_raw, true));
+    error_log('Processed job type for ACF: ' . print_r($job_type, true));
 
     $description  = wp_kses_post(rgar($entry, '8'));
     $apply_link   = esc_url_raw(rgar($entry, '9'));
@@ -71,8 +83,13 @@ function gf_handle_creol_job_submission($entry, $form) {
     // Save custom meta fields
     update_post_meta($post_id, 'company_name', $company_name);
     update_post_meta($post_id, 'location', $location);
-    // Save job type as ACF field
-    update_field('job_type', $job_type, $post_id);
+    // Save job type using ACF
+    if (!empty($job_type)) {
+        update_field('job_type', $job_type, $post_id);
+        // Backup save as post meta for debugging
+        update_post_meta($post_id, '_debug_job_type', $job_type);
+        error_log('Saving job types to post ' . $post_id . ': ' . print_r($job_type, true));
+    }
     update_post_meta($post_id, 'apply_link', $apply_link);
     update_post_meta($post_id, 'contact', $contact_email);
     update_field('is_affiliate', $is_affiliate, $post_id);
