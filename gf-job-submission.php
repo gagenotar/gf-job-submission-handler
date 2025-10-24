@@ -63,19 +63,19 @@ function gf_handle_creol_job_submission($entry, $form) {
     error_log( print_r( $entry, true ) );
     error_log( print_r( $form, true ) );
     // Get and sanitize basic fields
-    $job_title    = sanitize_text_field(rgar($entry, '6')); // IDs come from the GF form editor
-    $company_name = sanitize_text_field(rgar($entry, '4'));
-    $location     = sanitize_text_field(rgar($entry, '5'));
-    $description  = wp_kses_post(rgar($entry, '8'));
-    $apply_link   = esc_url_raw(rgar($entry, '9'));
-    $contact_email = sanitize_text_field(rgar($entry, '10'));
-    $duration     = intval(rgar($entry, '12')) ?: 60;
+    $job_title    = sanitize_text_field(rgar($entry, 'job_title')); // names come from GF field names
+    $company_name = sanitize_text_field(rgar($entry, 'company'));
+    $location     = sanitize_text_field(rgar($entry, 'location'));
+    $description  = wp_kses_post(rgar($entry, 'job_description'));
+    $apply_link   = esc_url_raw(rgar($entry, 'application_link'));
+    $contact_email = sanitize_text_field(rgar($entry, 'contact'));
+    $duration     = intval(rgar($entry, 'job_duration')) ?: 60;
 
     // Get job type from dropdown field
-    $job_type = sanitize_text_field(rgar($entry, '7'));
+    $job_type = sanitize_text_field(rgar($entry, 'job_type'));
 
     // Get affiliate status from dropdown (Yes/No)
-    $is_affiliate = rgar($entry, '11');
+    $is_affiliate = rgar($entry, 'affiliate');
 
 
     // Set the post category based on affiliate status
