@@ -61,6 +61,7 @@ add_action('init', 'gf_confirm_portal_job_post_type');
 add_action('gform_after_submission_3', 'gf_handle_creol_job_submission', 10, 2);
 function gf_handle_creol_job_submission($entry, $form) {
     error_log( print_r( $entry, true ) );
+    error_log( print_r( $form, true ) );
     // Get and sanitize basic fields
     $job_title    = sanitize_text_field(rgar($entry, '6')); // IDs come from the GF form editor
     $company_name = sanitize_text_field(rgar($entry, '4'));
