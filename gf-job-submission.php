@@ -57,18 +57,35 @@ function gf_confirm_portal_job_post_type() {
 }
 add_action('init', 'gf_confirm_portal_job_post_type');
 
+/**
+ * Helper function to get mapping of data keyed by input name of Gravity Forms field
+ */
+function gf_get_map_from_form($entry, $form) {
+    $map = array();
+    foreach ($form['fields'] as $field) {
+        $input_name = rgar($field, 'inputName');
+        if ($input_name) {
+            $map[$input_name] = rgar($entry, (string)$field['id']);
+        }
+    }
+    return $map;
+}
+
 // Handle Gravity Forms submission for form ID 3
 add_action('gform_after_submission_3', 'gf_handle_creol_job_submission', 10, 2);
 function gf_handle_creol_job_submission($entry, $form) {
     error_log( print_r( $entry, true ) );
     error_log( print_r( $form, true ) );
+
+    $map = gf_get_map_from_form($entry, $form);
+
     // Get and sanitize basic fields
-    $job_title    = sanitize_text_field(rgar($entry, 'job_title')); // names come from GF field names
-    $company_name = sanitize_text_field(rgar($entry, 'company'));
-    $location     = sanitize_text_field(rgar($entry, 'location'));
-    $description  = wp_kses_post(rgar($entry, 'job_description'));
-    $apply_link   = esc_url_raw(rgar($entry, 'application_link'));
-    $contact_email = sanitize_text_field(rgar($entry, 'contact'));
+    $job_title    = sanitize_text_field( $map['job_title'] ?? ''); // names come from GF field inputNames
+    $company_name = sanitize_text_field( $map['company'] ?? '');
+    $location     = sanitize_text_field( $map['location'] ?? '');
+    $description  = wp_kses_post( $map['job_description'] ?? '');
+    $apply_link   = esc_url_raw( $map['application_link'] ?? '');
+    $contact_email = sanitize_text_field( $map['contact'] ?? '');
     $duration     = intval(rgar($entry, 'job_duration')) ?: 60;
 
     // Get job type from dropdown field
