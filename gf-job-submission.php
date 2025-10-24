@@ -19,6 +19,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function gf_confirm_portal_job_post_type() {
     if (post_type_exists('portal_job')) {
+        // Log if it exists
+        error_log('Portal Job post type already exists.');
         return;
     } else {
         // Register the post type
@@ -53,6 +55,7 @@ function gf_confirm_portal_job_post_type() {
             'menu_position'      => null,
             'supports'           => array('title', 'editor', 'author', 'thumbnail', 'excerpt', 'comments'),
         ));
+        error_log('Portal Job post type registered.');
     }
 }
 add_action('init', 'gf_confirm_portal_job_post_type');
@@ -85,7 +88,8 @@ function gf_handle_creol_job_submission($entry, $form) {
     $category = strtolower($is_affiliate) === 'yes' 
         ? [intval(get_category_by_slug('affiliate-job')->term_id)]
         : [intval(get_category_by_slug('portal-job')->term_id)];
-
+    error_log('Assigned category ID: ' . implode(',', $category));
+    
     // Create the post
     $post_id = wp_insert_post([
         'post_title'     => $job_title,
@@ -94,6 +98,27 @@ function gf_handle_creol_job_submission($entry, $form) {
         'post_status'    => 'private',
         'post_category'  => $category,
     ]);
+
+    $post = get_post( $post_id );
+    if ( ! $post ) {
+        error_log( 'Post created but could not be retrieved. ID: ' . $post_id );
+    } else {
+        $live_post_type  = $post->post_type;
+        $live_post_status = get_post_status( $post_id );
+
+        // Get category IDs and names (uses WP categories)
+        $cat_ids = wp_get_post_categories( $post_id );
+        $cat_names = array_map( function( $cid ) {
+            return get_cat_name( $cid );
+        }, $cat_ids );
+
+        error_log( 'Created post ID: ' . $post_id );
+        error_log( 'Post Title (sanitized): ' . $job_title );
+        error_log( 'Post Type (from DB): ' . $live_post_type );
+        error_log( 'Post Status (from DB): ' . $live_post_status );
+        error_log( 'Post Categories (IDs): ' . implode( ',', $cat_ids ) );
+        error_log( 'Post Categories (names): ' . implode( ', ', $cat_names ) );
+    }
 
     if (is_wp_error($post_id)) {
         error_log('Error creating portal job post: ' . $post_id->get_error_message());
