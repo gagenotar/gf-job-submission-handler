@@ -86,13 +86,13 @@ function gf_handle_creol_job_submission($entry, $form) {
     $description  = wp_kses_post( $map['job_description'] ?? '');
     $apply_link   = esc_url_raw( $map['application_link'] ?? '');
     $contact_email = sanitize_text_field( $map['contact'] ?? '');
-    $duration     = intval(rgar($entry, 'job_duration')) ?: 60;
+    $duration     = intval( $map['job_duration'] ?? 60 ) ?: 60;
 
     // Get job type from dropdown field
-    $job_type = sanitize_text_field(rgar($entry, 'job_type'));
+    $job_type = sanitize_text_field( $map['job_type'] ?? '');
 
     // Get affiliate status from dropdown (Yes/No)
-    $is_affiliate = rgar($entry, 'affiliate');
+    $is_affiliate = sanitize_text_field( $map['affiliate'] ?? 'No' );
 
 
     // Set the post category based on affiliate status
